@@ -13,6 +13,10 @@
     body, input, select, textarea, button, p, span, h1, h2, h3, h4, h5, h6, a {
       font-family: "Times New Roman", Times, Georgia, serif;
     }
+    /* Đảm bảo FontAwesome luôn hiển thị đúng icon */
+    .fa, .fab, .fad, .fal, .far, .fas, .fa-solid, .fa-regular, .fa-brands {
+      font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+    }
     /* Thanh cuộn phong cách cổ điển */
     ::-webkit-scrollbar { width: 8px; }
     ::-webkit-scrollbar-track { background: #13110f; }
@@ -141,7 +145,7 @@
         <!-- JS render chi tiết truyện -->
       </div>
 
-      <!-- KHU VỰC BÌNH LUẬN -->
+      <!-- KHU VỰC BÌNH LUẬN TRUYỆN -->
       <div class="mt-10 border-t border-amber-950/40 pt-8 max-w-4xl mx-auto">
         <h3 class="text-xl font-bold text-amber-100 mb-6 flex items-center gap-2">
           <i class="fa-solid fa-comments text-amber-500"></i> Độc Giả Bình Luận
@@ -158,7 +162,7 @@
     </div>
 
 
-    <!-- ==================== 4. ĐỌC TRUYỆN ==================== -->
+    <!-- ==================== 4. ĐỌC TRUYỆN (BỔ SUNG THẢO LUẬN CHƯƠNG) ==================== -->
     <div id="view-reader" class="view-section hidden">
       <div class="max-w-2xl mx-auto">
         <div class="flex items-center justify-between mb-6 pb-4 border-b border-amber-950/30">
@@ -172,6 +176,7 @@
           </div>
         </div>
 
+        <!-- Trang đọc cổ điển -->
         <article class="bg-[#f0e6d2] text-[#2b221a] p-8 md:p-14 rounded-xl border border-amber-900/20 shadow-2xl">
           <p id="reader-story-title" class="text-center text-amber-800 text-xs font-bold uppercase tracking-widest mb-2"></p>
           <h2 id="reader-chapter-title" class="text-center text-2xl md:text-3xl font-bold text-[#1a120b] mb-10 leading-snug"></h2>
@@ -181,6 +186,7 @@
           </div>
         </article>
 
+        <!-- Chuyển chương -->
         <div class="flex justify-between items-center mt-8">
           <button id="btn-prev-chapter" class="bg-[#1c1816] hover:bg-stone-900 text-amber-200 px-5 py-2.5 rounded-lg border border-amber-950/55 transition flex items-center space-x-2 disabled:opacity-40">
             <i class="fa-solid fa-arrow-left"></i> <span>Chương trước</span>
@@ -189,6 +195,18 @@
             <span>Chương sau</span> <i class="fa-solid fa-arrow-right"></i>
           </button>
         </div>
+
+        <!-- KHU VỰC THẢO LUẬN CHƯƠNG TRUYỆN (MỚI BỔ SUNG) -->
+        <div class="mt-12 border-t border-amber-950/40 pt-8">
+          <h3 class="text-lg font-bold text-amber-100 mb-6 flex items-center gap-2">
+            <i class="fa-solid fa-comments text-amber-500"></i> Thảo Luận Chương
+          </h3>
+          <!-- Form viết phản hồi thảo luận chương -->
+          <div id="chapter-comment-form-container" class="mb-8"></div>
+          <!-- Hiển thị các thảo luận chương -->
+          <div id="chapter-comments-list" class="space-y-4"></div>
+        </div>
+
       </div>
     </div>
 
@@ -358,7 +376,7 @@
         <p class="text-amber-200/60">Quản lý duyệt truyện sáng tác, thành viên, và phản hồi góp ý tại Everbloom Library.</p>
       </div>
 
-      <!-- Tab Điều khiển Admin mở rộng lên 3 Tab -->
+      <!-- Tab Điều khiển Admin -->
       <div class="flex flex-wrap border-b border-amber-950/50 mb-6 max-w-lg">
         <button onclick="toggleAdminTab('stories')" id="tab-admin-stories" class="flex-1 py-2 text-center border-b-2 border-amber-500 text-amber-200 font-bold min-w-[100px]">Kiểm Duyệt</button>
         <button onclick="toggleAdminTab('feedbacks')" id="tab-admin-feedbacks" class="flex-1 py-2 text-center border-b-2 border-transparent text-stone-500 hover:text-stone-300 font-semibold min-w-[100px]">Ý Kiến Góp Ý</button>
@@ -381,7 +399,7 @@
         <div id="admin-feedbacks-list" class="space-y-4"></div>
       </div>
 
-      <!-- Phân khu 3: Danh sách & Kiểm soát tài khoản độc giả -->
+      <!-- Phân khu 3: Danh sách thành viên -->
       <div id="admin-users-section" class="bg-[#1c1816] border border-amber-950/40 rounded-2xl p-6 shadow-xl hidden">
         <h2 class="text-xl font-bold text-amber-200 mb-6 flex items-center gap-2">
           <span class="w-1.5 h-5 rounded bg-amber-500"></span> Danh Sách Thành Viên Thư Viện (<span id="user-count">0</span>)
@@ -408,16 +426,13 @@
     </div>
 
 
-    <!-- ==================== 9. HỒ SƠ CÁ NHÂN (VIEW: PROFILE) ==================== -->
+    <!-- ==================== 9. HỒ SƠ CÁ NHÂN ==================== -->
     <div id="view-profile" class="view-section hidden">
       <div class="max-w-md mx-auto bg-[#1c1816] p-8 rounded-2xl border border-amber-950/40 shadow-2xl text-center">
         <h2 class="text-2xl font-bold text-amber-100 mb-6"><i class="fa-solid fa-address-card mr-2 text-amber-600"></i>Hồ Sơ Cá Nhân</h2>
         
         <div class="flex flex-col items-center space-y-4 mb-6">
-          <!-- Xem trước Avatar -->
-          <div id="profile-avatar-preview-container">
-            <!-- JS render ảnh đại diện tại đây -->
-          </div>
+          <div id="profile-avatar-preview-container"></div>
           
           <div class="w-full">
             <span class="block text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">Tải Lên Ảnh Đại Diện Mới</span>
@@ -532,10 +547,9 @@
     function updateNavbarAuth() {
       const area = document.getElementById('auth-nav-area');
       if (currentUser) {
-        // Vẽ Avatar ở Navbar
         let navAvatarHTML = "";
         if (currentUser.avatar) {
-          navAvatarHTML = `<img src="${currentUser.avatar}" alt="avatar" class="w-8 h-8 rounded-full object-cover border border-amber-800/60 cursor-pointer animate-fade-in" onclick="navigateTo('profile')">`;
+          navAvatarHTML = `<img src="${currentUser.avatar}" alt="avatar" class="w-8 h-8 rounded-full object-cover border border-amber-800/60 cursor-pointer" onclick="navigateTo('profile')">`;
         } else {
           navAvatarHTML = `
             <div class="w-8 h-8 rounded-full bg-amber-800 text-amber-100 flex items-center justify-center font-bold text-xs border border-amber-800/60 cursor-pointer select-none" onclick="navigateTo('profile')">
@@ -798,6 +812,7 @@
       }
     }
 
+    // Like sách
     function toggleLike(storyId) {
       if (!currentUser) {
         alert("Bạn cần đăng nhập tài khoản để gửi thả thích!");
@@ -821,6 +836,7 @@
       renderStoryDetail(storyId);
     }
 
+    // Thêm vào tủ sách
     function toggleFavorite(storyId) {
       if (!currentUser) {
         alert("Bạn cần đăng nhập tài khoản để lưu truyện!");
@@ -849,7 +865,7 @@
       renderStoryDetail(storyId);
     }
 
-    // Bình luận truyện kèm Avatar đồng bộ
+    // Bình luận toàn bộ truyện kèm Avatar
     function renderCommentsSection(story) {
       const formContainer = document.getElementById('comment-form-container');
       const commentsList = document.getElementById('comments-list');
@@ -983,7 +999,7 @@
     }
 
 
-    // ==================== ĐỌC CHƯƠNG ====================
+    // ==================== ĐỌC CHƯƠNG (BỔ SUNG THẢO LUẬN CHƯƠNG) ====================
     function renderReader(storyId, chapterIndex) {
       const story = stories.find(s => s.id === storyId);
       if (!story || !story.chapters[chapterIndex]) return;
@@ -1019,6 +1035,100 @@
       } else {
         btnNext.disabled = true;
       }
+
+      // Kích hoạt render thảo luận chương riêng biệt
+      renderChapterCommentsSection(storyId, chapterIndex);
+    }
+
+    // RENDER THẢO LUẬN CHƯƠNG RIÊNG BIỆT (MỚI)
+    function renderChapterCommentsSection(storyId, chapterIndex) {
+      const formContainer = document.getElementById('chapter-comment-form-container');
+      const commentsList = document.getElementById('chapter-comments-list');
+
+      const story = stories.find(s => s.id === storyId);
+      if (!story || !story.chapters[chapterIndex]) return;
+
+      const chapter = story.chapters[chapterIndex];
+      if (!chapter.comments) chapter.comments = [];
+
+      // 1. Form viết bình luận chương
+      if (currentUser) {
+        formContainer.innerHTML = `
+          <form onsubmit="handlePostChapterComment(event, '${storyId}', ${chapterIndex})" class="flex flex-col gap-3">
+            <textarea id="chapter-comment-text" required placeholder="Nhận xét của bạn sau khi đọc xong chương này..." class="w-full bg-[#13110f] text-white border border-amber-950/60 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-600 text-sm resize-none" rows="3"></textarea>
+            <button type="submit" class="self-end bg-amber-700 hover:bg-amber-600 text-white font-bold text-xs px-5 py-2.5 rounded-lg transition">Gửi Bình Luận</button>
+          </form>
+        `;
+      } else {
+        formContainer.innerHTML = `
+          <div class="bg-[#13110f] p-4 rounded-xl border border-amber-950/60 text-center">
+            <span class="text-sm text-amber-200/50 mr-2">Cần đăng nhập tài khoản để viết nhận xét chương.</span>
+            <button onclick="navigateTo('auth')" class="text-xs bg-amber-800 hover:bg-amber-700 text-white px-3 py-1.5 rounded">Đăng Nhập Ngay</button>
+          </div>
+        `;
+      }
+
+      // 2. Render danh sách các bình luận của riêng chương này
+      commentsList.innerHTML = '';
+      if (chapter.comments.length === 0) {
+        commentsList.innerHTML = `<p class="text-stone-500 text-xs italic">Chưa có bình luận nào cho chương này. Hãy viết nhận xét đầu tiên!</p>`;
+        return;
+      }
+
+      chapter.comments.forEach(c => {
+        const commenter = users.find(u => u.username === c.username);
+        let avatarHTML = "";
+        if (commenter && commenter.avatar) {
+          avatarHTML = `<img src="${commenter.avatar}" alt="avatar" class="w-10 h-10 rounded-full object-cover border border-amber-950/50 flex-shrink-0">`;
+        } else {
+          avatarHTML = `
+            <div class="w-10 h-10 rounded-full bg-amber-800/80 text-amber-100 flex items-center justify-center font-bold text-sm border border-amber-950/50 flex-shrink-0 select-none">
+              ${c.username.charAt(0).toUpperCase()}
+            </div>
+          `;
+        }
+
+        const div = document.createElement('div');
+        div.className = "bg-[#1c1816]/60 p-4 rounded-xl border border-amber-950/40 text-sm flex gap-3.5 items-start shadow";
+        div.innerHTML = `
+          ${avatarHTML}
+          <div class="flex-grow">
+            <div class="flex justify-between items-center mb-1">
+              <span class="font-bold text-amber-200">${c.username}</span>
+              <span class="text-[10px] text-stone-500 font-mono">${c.date}</span>
+            </div>
+            <p class="text-stone-300 leading-relaxed">${c.text}</p>
+          </div>
+        `;
+        commentsList.appendChild(div);
+      });
+    }
+
+    // Xử lý gửi bình luận chương
+    function handlePostChapterComment(event, storyId, chapterIndex) {
+      event.preventDefault();
+      const txtInput = document.getElementById('chapter-comment-text');
+      const text = txtInput.value.trim();
+      if (!text) return;
+
+      const story = stories.find(s => s.id === storyId);
+      if (!story || !story.chapters[chapterIndex]) return;
+
+      const chapter = story.chapters[chapterIndex];
+      if (!chapter.comments) chapter.comments = [];
+
+      const today = new Date();
+      const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+
+      chapter.comments.unshift({
+        username: currentUser.username,
+        text,
+        date: dateStr
+      });
+
+      saveToLocalStorage();
+      txtInput.value = '';
+      renderChapterCommentsSection(storyId, chapterIndex);
     }
 
 
@@ -1255,7 +1365,7 @@
 
       const storyIndex = stories.findIndex(s => s.id === storyId);
       if (storyIndex !== -1) {
-        stories[storyIndex].chapters.push({ title, content });
+        stories[storyIndex].chapters.push({ title, content, comments: [] });
         saveToLocalStorage();
         
         document.getElementById('form-create-chapter').reset();
@@ -1410,7 +1520,7 @@
       }
     }
 
-    // QUẢN LÝ THÀNH VIÊN (Dành riêng cho Admin Kayden)
+    // QUẢN LÝ THÀNH VIÊN (Admin Kayden)
     function renderAdminUsers() {
       const list = document.getElementById('admin-users-list');
       const countText = document.getElementById('user-count');
@@ -1419,12 +1529,9 @@
       list.innerHTML = '';
 
       users.forEach(u => {
-        // Tính số truyện người dùng này viết
         const bookCount = stories.filter(s => s.owner === u.username).length;
-        // Tính số sách họ lưu yêu thích
         const favCount = u.favorites ? u.favorites.length : 0;
 
-        // Render Avatar cột
         let avatarHTML = "";
         if (u.avatar) {
           avatarHTML = `<img src="${u.avatar}" alt="avatar" class="w-10 h-10 rounded-full object-cover border border-amber-950/40">`;
@@ -1462,15 +1569,12 @@
       });
     }
 
-    // Admin xử lý: Xóa tài khoản thành viên vi phạm
     function deleteUser(username) {
       const confirmDel = confirm(`CẢNH BÁO: Bạn có thực sự muốn xóa vĩnh viễn tài khoản "${username}" không? \n\nTài khoản này sẽ bị trục xuất ngay lập tức, các tác phẩm của họ sẽ được chuyển quyền sở hữu sang tài khoản "Ẩn danh" để kệ sách Everbloom Library không bị lỗi dữ liệu.`);
       if (confirmDel) {
-        // Gỡ tài khoản khỏi CSDL
         users = users.filter(u => u.username.toLowerCase() !== username.toLowerCase());
         localStorage.setItem('library_users_db', JSON.stringify(users));
 
-        // Chuyển nhượng truyện do người bị xóa sở hữu sang system/ẩn danh để bảo vệ tính toàn vẹn dữ liệu
         stories.forEach(s => {
           if (s.owner === username) {
             s.owner = "system";
