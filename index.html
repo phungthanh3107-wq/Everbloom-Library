@@ -13,10 +13,6 @@
     body, input, select, textarea, button, p, span, h1, h2, h3, h4, h5, h6, a {
       font-family: "Times New Roman", Times, Georgia, serif;
     }
-    /* Đảm bảo FontAwesome luôn hiển thị đúng icon */
-    .fa, .fab, .fad, .fal, .far, .fas, .fa-solid, .fa-regular, .fa-brands {
-      font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
-    }
     /* Thanh cuộn phong cách cổ điển */
     ::-webkit-scrollbar { width: 8px; }
     ::-webkit-scrollbar-track { background: #13110f; }
@@ -359,13 +355,14 @@
         <h1 class="text-3xl font-bold text-amber-100 mb-2 flex items-center gap-3">
           <i class="fa-solid fa-user-shield text-amber-500"></i> Phòng Kiểm Duyệt Admin (Kayden)
         </h1>
-        <p class="text-amber-200/60">Quản lý duyệt truyện sáng tác và phản hồi góp ý từ độc giả gửi về Everbloom Library.</p>
+        <p class="text-amber-200/60">Quản lý duyệt truyện sáng tác, thành viên, và phản hồi góp ý tại Everbloom Library.</p>
       </div>
 
-      <!-- Tab Điều khiển Admin -->
-      <div class="flex border-b border-amber-950/50 mb-6 max-w-md">
-        <button onclick="toggleAdminTab('stories')" id="tab-admin-stories" class="flex-1 py-2 text-center border-b-2 border-amber-500 text-amber-200 font-bold">Kiểm Duyệt Truyện</button>
-        <button onclick="toggleAdminTab('feedbacks')" id="tab-admin-feedbacks" class="flex-1 py-2 text-center border-b-2 border-transparent text-stone-500 hover:text-stone-300 font-semibold">Ý Kiến Góp Ý</button>
+      <!-- Tab Điều khiển Admin mở rộng lên 3 Tab -->
+      <div class="flex flex-wrap border-b border-amber-950/50 mb-6 max-w-lg">
+        <button onclick="toggleAdminTab('stories')" id="tab-admin-stories" class="flex-1 py-2 text-center border-b-2 border-amber-500 text-amber-200 font-bold min-w-[100px]">Kiểm Duyệt</button>
+        <button onclick="toggleAdminTab('feedbacks')" id="tab-admin-feedbacks" class="flex-1 py-2 text-center border-b-2 border-transparent text-stone-500 hover:text-stone-300 font-semibold min-w-[100px]">Ý Kiến Góp Ý</button>
+        <button onclick="toggleAdminTab('users')" id="tab-admin-users" class="flex-1 py-2 text-center border-b-2 border-transparent text-stone-500 hover:text-stone-300 font-semibold min-w-[100px]">Quản Lý Thành Viên</button>
       </div>
 
       <!-- Phân khu 1: Duyệt truyện -->
@@ -383,6 +380,31 @@
         </h2>
         <div id="admin-feedbacks-list" class="space-y-4"></div>
       </div>
+
+      <!-- Phân khu 3: Danh sách & Kiểm soát tài khoản độc giả -->
+      <div id="admin-users-section" class="bg-[#1c1816] border border-amber-950/40 rounded-2xl p-6 shadow-xl hidden">
+        <h2 class="text-xl font-bold text-amber-200 mb-6 flex items-center gap-2">
+          <span class="w-1.5 h-5 rounded bg-amber-500"></span> Danh Sách Thành Viên Thư Viện (<span id="user-count">0</span>)
+        </h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm text-stone-300">
+            <thead class="text-xs uppercase bg-[#13110f] text-amber-400 border-b border-amber-950/60">
+              <tr>
+                <th class="p-4">Chân Dung</th>
+                <th class="p-4">Tên Tài Khoản</th>
+                <th class="p-4">Quyền Hạn</th>
+                <th class="p-4 text-center">Tác Phẩm Đã Viết</th>
+                <th class="p-4 text-center">Sách Đã Lưu (Yêu Thích)</th>
+                <th class="p-4 text-center">Thao Tác</th>
+              </tr>
+            </thead>
+            <tbody id="admin-users-list" class="divide-y divide-amber-950/30">
+              <!-- Render danh sách tài khoản bằng JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
 
 
@@ -513,10 +535,10 @@
         // Vẽ Avatar ở Navbar
         let navAvatarHTML = "";
         if (currentUser.avatar) {
-          navAvatarHTML = `<img src="${currentUser.avatar}" alt="avatar" class="w-8 h-8 rounded-full object-cover border border-amber-800/60 cursor-pointer" onclick="navigateTo('profile')">`;
+          navAvatarHTML = `<img src="${currentUser.avatar}" alt="avatar" class="w-8 h-8 rounded-full object-cover border border-amber-800/60 cursor-pointer animate-fade-in" onclick="navigateTo('profile')">`;
         } else {
           navAvatarHTML = `
-            <div class="w-8 h-8 rounded-full bg-amber-800 text-amber-100 flex items-center justify-center font-bold text-xs border border-amber-800/60 cursor-pointer" onclick="navigateTo('profile')">
+            <div class="w-8 h-8 rounded-full bg-amber-800 text-amber-100 flex items-center justify-center font-bold text-xs border border-amber-800/60 cursor-pointer select-none" onclick="navigateTo('profile')">
               ${currentUser.username.charAt(0).toUpperCase()}
             </div>
           `;
@@ -737,7 +759,7 @@
 
               <button onclick="toggleFavorite('${story.id}')" class="px-5 py-3 rounded-lg border border-amber-950/60 hover:bg-stone-900 transition flex items-center space-x-2 text-sm ${inLibrary ? 'bg-amber-950/50 text-amber-300 border-amber-800/60' : 'text-amber-200'}">
                 <i class="fa-${inLibrary ? 'solid' : 'regular'} fa-bookmark"></i>
-                <span>${inLibrary ? 'Trong Tủ Sách' : 'Lưu Vào Tủ Sách'}</span>
+                <span>Trong Tủ Sách</span>
               </button>
 
               ${canDelete ? `
@@ -763,7 +785,6 @@
       renderCommentsSection(story);
     }
 
-    // Xóa truyện
     function handleDeleteStory(storyId) {
       const story = stories.find(s => s.id === storyId);
       if (!story) return;
@@ -777,7 +798,6 @@
       }
     }
 
-    // Like sách
     function toggleLike(storyId) {
       if (!currentUser) {
         alert("Bạn cần đăng nhập tài khoản để gửi thả thích!");
@@ -801,7 +821,6 @@
       renderStoryDetail(storyId);
     }
 
-    // Lưu tủ sách
     function toggleFavorite(storyId) {
       if (!currentUser) {
         alert("Bạn cần đăng nhập tài khoản để lưu truyện!");
@@ -858,7 +877,6 @@
       }
 
       story.comments.forEach(c => {
-        // Tìm thông tin avatar người bình luận
         const commenter = users.find(u => u.username === c.username);
         let avatarHTML = "";
         if (commenter && commenter.avatar) {
@@ -1050,7 +1068,6 @@
       }
     }
 
-    // Đăng ký
     function handleRegister(event) {
       event.preventDefault();
       const usernameInput = document.getElementById('register-username').value.trim();
@@ -1078,12 +1095,11 @@
       users.push(newUser);
       localStorage.setItem('library_users_db', JSON.stringify(users));
       
-      alert("Đăng ký thành công! Mời bạn đăng nhập.");
+      alert("Đăng ký thành công! Bạn có thể chuyển sang tab Đăng Nhập để truy cập.");
       toggleAuthTab('login');
       document.getElementById('form-register').reset();
     }
 
-    // Đăng nhập
     function handleLogin(event) {
       event.preventDefault();
       const userVal = document.getElementById('login-username').value.trim();
@@ -1181,7 +1197,6 @@
       });
     }
 
-    // Gửi sách mới (Xử lý upload ảnh Base64 của ảnh bìa)
     async function handleCreateStory(event) {
       event.preventDefault();
       
@@ -1189,11 +1204,10 @@
       const genre = document.getElementById('story-genre').value.trim();
       const description = document.getElementById('story-desc').value.trim();
 
-      let coverSrc = "https://picsum.photos/seed/" + Date.now() + "/300/400"; // Ảnh mặc định ngẫu nhiên
+      let coverSrc = "https://picsum.photos/seed/" + Date.now() + "/300/400"; 
       const urlInput = document.getElementById('story-cover').value.trim();
       const fileInput = document.getElementById('story-cover-file');
 
-      // Ưu tiên tệp ảnh tải lên từ thiết bị trước
       if (fileInput.files.length > 0) {
         const file = fileInput.files[0];
         if (file.size > 1.5 * 1024 * 1024) {
@@ -1213,7 +1227,7 @@
         genre,
         cover: coverSrc,
         description,
-        approved: false,
+        approved: false, 
         likes: [],
         comments: [],
         chapters: []
@@ -1256,25 +1270,33 @@
     }
 
 
-    // ==================== TRANG KIỂM DUYỆT ADMIN ====================
+    // ==================== TRANG KIỂM DUYỆT ADMIN (KAYDEN) ====================
     function toggleAdminTab(tab) {
       const tabStories = document.getElementById('tab-admin-stories');
       const tabFeedbacks = document.getElementById('tab-admin-feedbacks');
+      const tabUsers = document.getElementById('tab-admin-users');
+
       const storiesSection = document.getElementById('admin-stories-section');
       const feedbacksSection = document.getElementById('admin-feedbacks-section');
+      const usersSection = document.getElementById('admin-users-section');
+
+      [tabStories, tabFeedbacks, tabUsers].forEach(t => {
+        t.className = "flex-1 py-2 text-center border-b-2 border-transparent text-stone-500 hover:text-stone-300 font-semibold min-w-[100px]";
+      });
+      [storiesSection, feedbacksSection, usersSection].forEach(s => s.classList.add('hidden'));
 
       if (tab === 'stories') {
-        tabStories.className = "flex-1 py-2 text-center border-b-2 border-amber-500 text-amber-200 font-bold";
-        tabFeedbacks.className = "flex-1 py-2 text-center border-b-2 border-transparent text-stone-500 hover:text-stone-300 font-semibold";
+        tabStories.className = "flex-1 py-2 text-center border-b-2 border-amber-500 text-amber-200 font-bold min-w-[100px]";
         storiesSection.classList.remove('hidden');
-        feedbacksSection.classList.add('hidden');
         renderAdminDashboard();
-      } else {
-        tabStories.className = "flex-1 py-2 text-center border-b-2 border-transparent text-stone-500 hover:text-stone-300 font-semibold";
-        tabFeedbacks.className = "flex-1 py-2 text-center border-b-2 border-amber-500 text-amber-200 font-bold";
-        storiesSection.classList.add('hidden');
+      } else if (tab === 'feedbacks') {
+        tabFeedbacks.className = "flex-1 py-2 text-center border-b-2 border-amber-500 text-amber-200 font-bold min-w-[100px]";
         feedbacksSection.classList.remove('hidden');
         renderAdminFeedbacks();
+      } else if (tab === 'users') {
+        tabUsers.className = "flex-1 py-2 text-center border-b-2 border-amber-500 text-amber-200 font-bold min-w-[100px]";
+        usersSection.classList.remove('hidden');
+        renderAdminUsers();
       }
     }
 
@@ -1388,6 +1410,80 @@
       }
     }
 
+    // QUẢN LÝ THÀNH VIÊN (Dành riêng cho Admin Kayden)
+    function renderAdminUsers() {
+      const list = document.getElementById('admin-users-list');
+      const countText = document.getElementById('user-count');
+
+      countText.innerText = users.length;
+      list.innerHTML = '';
+
+      users.forEach(u => {
+        // Tính số truyện người dùng này viết
+        const bookCount = stories.filter(s => s.owner === u.username).length;
+        // Tính số sách họ lưu yêu thích
+        const favCount = u.favorites ? u.favorites.length : 0;
+
+        // Render Avatar cột
+        let avatarHTML = "";
+        if (u.avatar) {
+          avatarHTML = `<img src="${u.avatar}" alt="avatar" class="w-10 h-10 rounded-full object-cover border border-amber-950/40">`;
+        } else {
+          avatarHTML = `
+            <div class="w-10 h-10 rounded-full bg-amber-800/80 text-amber-100 flex items-center justify-center font-bold text-sm border border-amber-950/40 select-none">
+              ${u.username.charAt(0).toUpperCase()}
+            </div>
+          `;
+        }
+
+        const isSelf = currentUser && u.username.toLowerCase() === currentUser.username.toLowerCase();
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-[#1c1816]/40 transition border-b border-amber-950/30";
+        tr.innerHTML = `
+          <td class="p-4">${avatarHTML}</td>
+          <td class="p-4 font-bold text-amber-100">${u.username} ${isSelf ? ' <span class="text-xs text-stone-500 font-normal italic">(Tôi)</span>' : ''}</td>
+          <td class="p-4 text-xs font-semibold">
+            ${u.role === 'admin' ? '<span class="text-purple-400 flex items-center gap-1"><i class="fa-solid fa-crown text-[10px]"></i>Admin</span>' : '<span class="text-stone-400">Thành viên</span>'}
+          </td>
+          <td class="p-4 text-sm text-center font-bold text-amber-300 font-mono">${bookCount}</td>
+          <td class="p-4 text-sm text-center text-stone-300 font-mono">${favCount}</td>
+          <td class="p-4">
+            ${isSelf ? `
+              <span class="text-xs text-stone-500 italic font-medium">Bảo vệ hệ thống</span>
+            ` : `
+              <button onclick="deleteUser('${u.username}')" class="text-xs bg-red-950/30 hover:bg-red-950 text-red-400 border border-red-900/40 px-3 py-1.5 rounded transition font-semibold flex items-center gap-1">
+                <i class="fa-solid fa-user-minus text-[10px]"></i> Trục Xuất
+              </button>
+            `}
+          </td>
+        `;
+        list.appendChild(tr);
+      });
+    }
+
+    // Admin xử lý: Xóa tài khoản thành viên vi phạm
+    function deleteUser(username) {
+      const confirmDel = confirm(`CẢNH BÁO: Bạn có thực sự muốn xóa vĩnh viễn tài khoản "${username}" không? \n\nTài khoản này sẽ bị trục xuất ngay lập tức, các tác phẩm của họ sẽ được chuyển quyền sở hữu sang tài khoản "Ẩn danh" để kệ sách Everbloom Library không bị lỗi dữ liệu.`);
+      if (confirmDel) {
+        // Gỡ tài khoản khỏi CSDL
+        users = users.filter(u => u.username.toLowerCase() !== username.toLowerCase());
+        localStorage.setItem('library_users_db', JSON.stringify(users));
+
+        // Chuyển nhượng truyện do người bị xóa sở hữu sang system/ẩn danh để bảo vệ tính toàn vẹn dữ liệu
+        stories.forEach(s => {
+          if (s.owner === username) {
+            s.owner = "system";
+            s.author = "Ẩn danh (Tác giả đã gỡ)";
+          }
+        });
+        saveToLocalStorage();
+
+        alert(`Đã xóa tài khoản "${username}" thành công!`);
+        renderAdminUsers();
+      }
+    }
+
 
     // ==================== QUẢN LÝ AVATAR HỒ SƠ ====================
     async function previewAvatar(event) {
@@ -1425,15 +1521,12 @@
 
       const fullUser = users.find(u => u.username === currentUser.username);
       if (fullUser) {
-        // Cập nhật Base64 của ảnh mới nếu có
         if (tempAvatarBase64) {
           fullUser.avatar = tempAvatarBase64;
         }
 
-        // Lưu dữ liệu vào CSDL người dùng
         localStorage.setItem('library_users_db', JSON.stringify(users));
 
-        // Đồng bộ dữ liệu đăng nhập hiện tại
         currentUser = fullUser;
         sessionStorage.setItem('library_session', JSON.stringify(currentUser));
 
