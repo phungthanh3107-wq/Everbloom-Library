@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Everbloom Library - Thư Viện Sách Cổ Điển</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons phiên bản ổn định nhất -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    /* Áp dụng Font chữ Times New Roman cho văn bản, chừa lại FontAwesome cho biểu tượng */
+    body, input, select, textarea, button, p, span, h1, h2, h3, h4, h5, h6, a {
+      font-family: "Times New Roman", Times, Georgia, serif;
+    }
+    /* Đảm bảo FontAwesome luôn hiển thị đúng icon */
+    .fa, .fab, .fad, .fal, .far, .fas, .fa-solid, .fa-regular, .fa-brands {
+      font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+    }
+    /* Thanh cuộn phong cách cổ điển */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #13110f; }
+    ::-webkit-scrollbar-thumb { background: #451a03; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #78350f; }
+  </style>
+</head>
+<body class="bg-[#13110f] text-[#f5efe6] min-h-screen flex flex-col font-sans">
+
+  <!-- ==================== HỘP THOẠI CHÀO MỪNG ĐĂNG NHẬP ==================== -->
+  <div id="welcome-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-[#1c1816] border border-amber-900/60 p-8 rounded-2xl max-w-md w-full mx-4 shadow-2xl relative text-center">
+      <div class="w-16 h-16 bg-gradient-to-tr from-amber-800 to-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-amber-900/30">
+        <i class="fa-solid fa-mug-hot text-amber-100 text-2xl"></i>
+      </div>
+      <h3 class="text-2xl font-bold text-amber-200 mb-4">Đăng Nhập Thành Công!</h3>
+      <p id="welcome-message-text" class="text-stone-300 leading-relaxed mb-6 italic text-base"></p>
+      <button onclick="closeWelcomeModal()" class="bg-amber-700 hover:bg-amber-600 text-white font-bold px-8 py-2.5 rounded-xl transition shadow-lg shadow-amber-900/20 text-sm">
+        Bắt Đầu Trải Nghiệm
+      </button>
+    </div>
+  </div>
+
+  <!-- Thanh Điều Hướng (Navbar) -->
+  <header class="bg-[#1c1816] border-b border-amber-900/30 sticky top-0 z-50 shadow-md">
+    <div class="container mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Logo -->
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateTo('home')">
+        <div class="w-10 h-10 rounded-lg bg-gradient-to-tr from-amber-800 to-amber-600 flex items-center justify-center shadow-lg">
+          <i class="fa-solid fa-feather-pointed text-amber-100 text-lg"></i>
+        </div>
+        <span class="text-2xl font-bold tracking-wider text-amber-200">Everbloom Library</span>
+      </div>
+
+      <!-- Menu Điều Hướng chính -->
+      <nav class="flex items-center space-x-1 md:space-x-3">
+        <button onclick="navigateTo('home')" class="hover:text-amber-300 transition px-3 py-1.5 rounded-lg text-sm md:text-base font-semibold flex items-center gap-1"><i class="fa-solid fa-book-open text-xs text-amber-500"></i> Kệ Sách</button>
+        <button onclick="navigateTo('library')" class="hover:text-amber-300 transition px-3 py-1.5 rounded-lg text-sm md:text-base font-semibold flex items-center gap-1"><i class="fa-solid fa-bookmark text-xs text-amber-500"></i> Tủ Sách</button>
+        <button onclick="navigateTo('creator')" class="hover:text-amber-300 transition px-3 py-1.5 rounded-lg text-sm md:text-base font-semibold flex items-center gap-1"><i class="fa-solid fa-feather text-xs text-amber-500"></i> Sáng Tác</button>
+        <button onclick="navigateTo('rules')" class="hover:text-amber-300 transition px-3 py-1.5 rounded-lg text-sm md:text-base font-semibold flex items-center gap-1"><i class="fa-solid fa-scale-balanced text-xs text-amber-500"></i> Nội Quy & Góp Ý</button>
+        
+        <!-- Chỉ Admin Kayden mới thấy nút này -->
+        <button id="nav-admin-btn" onclick="navigateTo('admin')" class="hidden bg-amber-950/80 hover:bg-amber-900 border border-amber-700/50 text-amber-200 px-3 py-1.5 rounded-lg text-sm transition font-semibold">
+          <i class="fa-solid fa-user-shield text-amber-400 mr-1"></i> Bảng Admin
+        </button>
+      </nav>
+
+      <!-- Khu vực Tài khoản -->
+      <div id="auth-nav-area" class="flex items-center space-x-3">
+        <!-- Được cập nhật bằng JS dựa trên trạng thái Đăng nhập -->
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Nội dung chính -->
+  <main class="flex-grow container mx-auto px-4 py-8 max-w-7xl">
+
+    <!-- ==================== 1. TRANG CHỦ / DANH SÁCH TRUYỆN ==================== -->
+    <div id="view-home" class="view-section">
+      <!-- Banner Thư Viện Gỗ -->
+      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-950 via-[#261f1c] to-[#1c1816] border border-amber-900/40 p-8 md:p-12 mb-10 shadow-xl">
+        <div class="absolute right-0 bottom-0 opacity-10 pointer-events-none">
+          <i class="fa-solid fa-book-open text-[200px] text-amber-100"></i>
+        </div>
+        <div class="max-w-2xl relative z-10">
+          <span class="text-xs font-bold uppercase tracking-widest text-amber-400 mb-2 block">Thư viện lưu giữ ký ức</span>
+          <h1 class="text-3xl md:text-4xl font-black text-amber-100 leading-tight mb-4">
+            Khám Phá Những Trang Sách Cổ
+          </h1>
+          <p class="text-amber-200/80 text-base md:text-lg mb-6 italic">"Sách là ngọn lửa sưởi ấm tâm hồn trong những đêm đông lạnh giá."</p>
+          <div class="flex flex-wrap gap-3">
+            <button onclick="navigateTo('creator')" class="bg-amber-700 hover:bg-amber-600 text-white font-bold px-6 py-2.5 rounded-lg transition shadow-md text-sm">Viết Sách Mới</button>
+            <a href="#book-catalog-section" class="bg-[#13110f] hover:bg-stone-900 text-amber-200 border border-amber-900/40 px-6 py-2.5 rounded-lg transition text-sm font-semibold">Dạo Quanh Thư Viện</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Khu tìm kiếm -->
+      <div id="book-catalog-section" class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-amber-950/30">
+        <h2 class="text-2xl font-bold text-amber-100 flex items-center gap-2">
+          <i class="fa-solid fa-book-bookmark text-amber-600"></i> Kệ Sách Công Cộng
+        </h2>
+        <div class="relative w-full sm:w-80">
+          <input type="text" id="search-input" oninput="searchStories()" placeholder="Tìm tên sách, tác giả..." class="w-full bg-[#1c1816] text-[#f5efe6] pl-10 pr-4 py-2.5 rounded-lg border border-amber-950/60 focus:outline-none focus:border-amber-600 transition text-sm">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-amber-800"></i>
+        </div>
+      </div>
+
+      <!-- Kệ gỗ hiển thị sách -->
+      <div class="bg-[#1c1816] p-6 md:p-8 rounded-2xl border border-amber-950/40 shadow-inner">
+        <div id="stories-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          <!-- JS render danh sách sách -->
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ==================== 2. TỦ SÁCH CÁ NHÂN ==================== -->
+    <div id="view-library" class="view-section hidden">
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-amber-100 mb-2 flex items-center gap-2">
+          <i class="fa-solid fa-bookmark text-amber-500"></i> Tủ Sách Cá Nhân Của Bạn
+        </h1>
+        <p class="text-amber-200/60 text-sm italic">Nơi lưu giữ các tác phẩm yêu thích của bạn.</p>
+      </div>
+
+      <!-- Hiển thị kệ gỗ -->
+      <div class="bg-[#241a15] p-6 md:p-10 rounded-2xl border border-amber-900/50 shadow-2xl relative">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-950/10 via-transparent to-transparent pointer-events-none"></div>
+        <div id="favorite-shelf" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 relative z-10">
+          <!-- JS render danh sách truyện yêu thích -->
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ==================== 3. CHI TIẾT SÁCH ==================== -->
+    <div id="view-story-detail" class="view-section hidden">
+      <button onclick="navigateTo('home')" class="text-amber-500 hover:text-amber-400 mb-6 flex items-center space-x-2 transition">
+        <i class="fa-solid fa-arrow-left-long"></i> <span>Quay lại kệ sách</span>
+      </button>
+
+      <div id="story-info-container">
+        <!-- JS render chi tiết truyện -->
+      </div>
+
+      <!-- KHU VỰC BÌNH LUẬN -->
+      <div class="mt-10 border-t border-amber-950/40 pt-8 max-w-4xl mx-auto">
+        <h3 class="text-xl font-bold text-amber-100 mb-6 flex items-center gap-2">
+          <i class="fa-solid fa-comments text-amber-500"></i> Độc Giả Bình Luận
+        </h3>
+        
+        <div id="comment-form-container" class="mb-8">
+          <!-- Form viết bình luận -->
+        </div>
+
+        <div id="comments-list" class="space-y-4">
+          <!-- Danh sách bình luận -->
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ==================== 4. ĐỌC TRUYỆN ==================== -->
+    <div id="view-reader" class="view-section hidden">
+      <div class="max-w-2xl mx-auto">
+        <div class="flex items-center justify-between mb-6 pb-4 border-b border-amber-950/30">
+          <button id="btn-back-to-story" class="text-amber-500 hover:text-amber-400 flex items-center space-x-1 transition font-semibold">
+            <i class="fa-solid fa-chevron-left text-sm"></i> <span class="text-sm">Trở về tủ sách</span>
+          </button>
+          
+          <div class="flex items-center space-x-3">
+            <button onclick="adjustFontSize(-2)" class="bg-[#1c1816] hover:bg-[#261f1c] px-3 py-1.5 rounded text-xs font-bold border border-amber-950/40 transition">A-</button>
+            <button onclick="adjustFontSize(2)" class="bg-[#1c1816] hover:bg-[#261f1c] px-3 py-1.5 rounded text-xs font-bold border border-amber-950/40 transition">A+</button>
+          </div>
+        </div>
+
+        <article class="bg-[#f0e6d2] text-[#2b221a] p-8 md:p-14 rounded-xl border border-amber-900/20 shadow-2xl">
+          <p id="reader-story-title" class="text-center text-amber-800 text-xs font-bold uppercase tracking-widest mb-2"></p>
+          <h2 id="reader-chapter-title" class="text-center text-2xl md:text-3xl font-bold text-[#1a120b] mb-10 leading-snug"></h2>
+          
+          <div id="reader-content" class="leading-relaxed space-y-6 text-lg">
+            <!-- Văn bản chương truyện -->
+          </div>
+        </article>
+
+        <div class="flex justify-between items-center mt-8">
+          <button id="btn-prev-chapter" class="bg-[#1c1816] hover:bg-stone-900 text-amber-200 px-5 py-2.5 rounded-lg border border-amber-950/55 transition flex items-center space-x-2 disabled:opacity-40">
+            <i class="fa-solid fa-arrow-left"></i> <span>Chương trước</span>
+          </button>
+          <button id="btn-next-chapter" class="bg-[#1c1816] hover:bg-stone-900 text-amber-200 px-5 py-2.5 rounded-lg border border-amber-950/55 transition flex items-center space-x-2 disabled:opacity-40">
+            <span>Chương sau</span> <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ==================== 5. NỘI QUY & GÓP Ý ==================== -->
+    <div id="view-rules" class="view-section hidden">
+      <div class="max-w-3xl mx-auto space-y-8">
+        
+        <div class="bg-[#1c1816] p-6 md:p-8 rounded-2xl border border-amber-950/40 shadow-xl">
+          <h2 class="text-2xl font-bold text-amber-100 mb-4 flex items-center gap-2 border-b border-amber-950/50 pb-3">
+            <i class="fa-solid fa-scale-balanced text-amber-500"></i> Nội Quy Everbloom Library
+          </h2>
+          <ul class="space-y-3 text-sm text-stone-300 list-decimal list-inside leading-relaxed">
+            <li><strong>Tôn trọng quyền tác giả:</strong> Không sao chép, sao chép trộm tác phẩm khi chưa được tác giả ký thác cho phép.</li>
+            <li><strong>Giữ gìn ngôn từ sạch đẹp:</strong> Các độc giả bình luận nhã nhặn, tôn trọng và xây dựng. Tuyệt đối cấm lăng mạ, chửi bậy, phá hoại không khí thư viện.</li>
+            <li><strong>Đề xuất sách lành mạnh:</strong> Tất cả truyện viết mới gửi lên phải đảm bảo chuẩn mực chung, không vi phạm pháp luật hay thuần phong mỹ tục.</li>
+            <li><strong>Quyền quyết định của Admin:</strong> Admin Kayden giữ quyền cao nhất về phê duyệt, gỡ bỏ các tác phẩm và khóa các tài khoản vi phạm nội quy.</li>
+          </ul>
+        </div>
+
+        <div class="bg-[#1c1816] p-6 md:p-8 rounded-2xl border border-amber-950/40 shadow-xl">
+          <h2 class="text-2xl font-bold text-amber-100 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-paper-plane text-amber-500"></i> Góp Ý & Phản Hồi
+          </h2>
+          <p class="text-xs text-amber-200/60 mb-4 italic">Đóng góp của bạn sẽ được gửi thẳng tới hòm thư cá nhân của Admin Kayden để xem xét chỉnh sửa.</p>
+          
+          <form onsubmit="handleSendFeedback(event)" class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-amber-400 uppercase mb-1">Nội dung đóng góp ý kiến *</label>
+              <textarea id="feedback-text" required placeholder="Ghi nhận xét, đóng góp hoặc phản hồi lỗi tại đây..." rows="5" class="w-full bg-[#13110f] text-white border border-amber-950/60 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-600 text-sm resize-none"></textarea>
+            </div>
+            <button type="submit" class="bg-amber-700 hover:bg-amber-600 text-white font-bold px-6 py-2.5 rounded-lg transition text-sm">Gửi Ý Kiến</button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- ==================== 6. ĐĂNG KÝ / ĐĂNG NHẬP ==================== -->
+    <div id="view-auth" class="view-section hidden">
+      <div class="max-w-md mx-auto bg-[#1c1816] p-8 rounded-2xl border border-amber-950/40 shadow-2xl">
+        
+        <div class="flex border-b border-amber-950/50 mb-6">
+          <button onclick="toggleAuthTab('login')" id="tab-login" class="flex-1 py-2 text-center border-b-2 border-amber-500 text-amber-200 font-bold">Đăng Nhập</button>
+          <button onclick="toggleAuthTab('register')" id="tab-register" class="flex-1 py-2 text-center border-b-2 border-transparent text-stone-500 hover:text-stone-300 font-semibold">Đăng Ký</button>
+        </div>
+
+        <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-amber-400 uppercase mb-1.5">Tên tài khoản</label>
+            <input type="text" id="login-username" required class="w-full bg-[#13110f] border border-amber-950/60 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-600 text-[#f5efe6] text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-amber-400 uppercase mb-1.5">Mật khẩu</label>
+            <input type="password" id="login-password" required class="w-full bg-[#13110f] border border-amber-950/60 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-600 text-[#f5efe6] text-sm">
+          </div>
+          <button type="submit" class="w-full bg-amber-700 hover:bg-amber-600 text-white font-bold py-3 rounded-xl transition shadow-lg mt-2 text-sm">Đăng Nhập</button>
+        </form>
+
+        <form id="form-register" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+          <div>
+            <label class="block text-xs font-bold text-amber-400 uppercase mb-1.5">Tên tài khoản mới *</label>
+            <input type="text" id="register-username" required class="w-full bg-[#13110f] border border-amber-950/60 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-600 text-[#f5efe6] text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-amber-400 uppercase mb-1.5">Mật khẩu *</label>
+            <input type="password" id="register-password" required class="w-full bg-[#13110f] border border-amber-950/60 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-600 text-[#f5efe6] text-sm">
+          </div>
+          <button type="submit" class="w-full bg-amber-700 hover:bg-amber-600 text-white font-bold py-3 rounded-xl transition shadow-lg mt-2 text-sm">Đăng Ký Tài Khoản</button>
+        </form>
+
+      </div>
+    </div>
+
+
+    <!-- ==================== 7. STUDIO SÁNG TÁC ==================== -->
+    <div id="view-creator" class="view-section hidden">
+      <!-- Cảnh báo nếu chưa đăng nhập -->
+      <div id="creator-auth-warning" class="max-w-md mx-auto text-center py-12 bg-[#1c1816] border border-amber-950/40 rounded-2xl hidden">
+        <i class="fa-solid fa-lock text-4xl text-amber-700 mb-4"></i>
+        <h3 class="text-xl font-bold text-white mb-2">Yêu Cầu Đăng Nhập</h3>
+        <p class="text-sm text-amber-200/60 mb-6">Bạn phải đăng nhập tài khoản để viết sách mới.</p>
+        <button onclick="navigateTo('auth')" class="bg-amber-700 hover:bg-amber-600 text-white px-6 py-2 rounded-xl transition font-semibold">Đăng Nhập Ngay</button>
+      </div>
+
+      <!-- Giao diện Viết Sách -->
+      <div id="creator-panel" class="max-w-2xl mx-auto bg-[#1c1816] p-6 md:p-8 rounded-2xl border border-amber-950/40 shadow-2xl">
+        <h2 class="text-2xl font-bold text-amber-100 mb-6 flex items-center space-x-2">
+          <i class="fa-solid fa-feather-pointed text-amber-500"></i>
+          <span>Góc Sáng Tác Sách</span>
+        </h2>
+
+        <div class="flex border-b border-amber-950/50 mb-6">
+          <button onclick="toggleCreatorTab('new-story')" id="tab-new-story" class="flex-1 py-2 text-center border-b-2 border-amber-500 text-amber-200 font-bold font-serif">Khai Thư (Tạo Truyện Mới)</button>
+          <button onclick="toggleCreatorTab('new-chapter')" id="tab-new-chapter" class="flex-1 py-2 text-center border-b-2 border-transparent text-stone-500 hover:text-stone-300 font-semibold font-serif">Chấp Bút (Đăng Chương Mới)</button>
+        </div>
+
+        <!-- Tạo Truyện Mới -->
+        <form id="form-create-story" onsubmit="handleCreateStory(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-amber-400 uppercase tracking-wide mb-1.5">Tên Sách/Truyện *</label>
+            <input type="text" id="story-title" required class="w-full bg-[#13110f] text-white border border-amber-950/60 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-600 text-sm">
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-amber-400 uppercase tracking-wide mb-1.5">Bút Danh Tác Giả</label>
+              <input type="text" id="story-author" readonly class="w-full bg-[#13110f]/60 text-stone-400 border border-amber-950/60 rounded-xl px-4 py-3 focus:outline-none cursor-not-allowed text-sm">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-amber-400 uppercase tracking-wide mb-1.5">Thể Loại *</label>
+              <input type="text" id="story-genre" required placeholder="Ví dụ: Kỳ ảo, Sử thi..." class="w-full bg-[#13110f] text-white border border-amber-950/60 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-600 text-sm">
+            </div>
+          </div>
+          
+          <!-- Hỗ trợ Upload ảnh lên trực tiếp -->
+          <div>
+            <label class="block text-xs font-bold text-amber-400 uppercase tracking-wide mb-1.5">Ảnh Bìa Sách *</label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-[#13110f] p-4 rounded-xl border border-amber-950/60">
+                <span class="block text-[11px] text-stone-500 mb-1.5 font-sans"><i class="fa-solid fa-arrow-up-from-bracket mr-1"></i> Cách 1: Tải lên tệp ảnh từ thiết bị (Tối đa 1.5MB)</span>
+                <input type="file" id="story-cover-file" accept="image/*" class="w-full text-stone-400 text-xs file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-bold file:bg-amber-900 file:text-amber-100 hover:file:bg-amber-800 cursor-pointer">
+              </div>
+              <div class="bg-[#13110f] p-4 rounded-xl border border-amber-950/60 flex flex-col justify-center">
+                <span class="block text-[11px] text-stone-500 mb-1.5 font-sans"><i class="fa-solid fa-link mr-1"></i> Cách 2: Hoặc dán đường dẫn ảnh trực tuyến</span>
+                <input type="url" id="story-cover" placeholder="Dán đường dẫn ảnh URL..." class="w-full bg-[#1c1816] text-white border border-amber-950/40 rounded-lg px-3 py-1.5 focus:outline-none focus:border-amber-600 text-xs">
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-amber-400 uppercase tracking-wide mb-1.5">Lời Tựa / Giới Thiệu Tóm Tắt *</label>
+            <textarea id="story-desc" required rows="4" class="w-full bg-[#13110f] text-white border border-amber-950/60 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-600 resize-none text-sm"></textarea>
+          </div>
+          <button type="submit" class="w-full bg-amber-700 hover:bg-amber-600 text-white font-bold py-3 rounded-xl transition shadow-lg mt-2 text-sm">Gửi Sách Chờ Kiểm Duyệt</button>
+          <p class="text-xs text-center text-stone-500 mt-2 italic">* Tác phẩm mới tạo sẽ ở trạng thái chờ Admin đọc và duyệt đăng.</p>
+        </form>
+
+        <!-- Đăng Chương Mới -->
+        <form id="form-create-chapter" onsubmit="handleCreateChapter(event)" class="space-y-4 hidden">
+          <div>
+            <label class="block text-xs font-bold text-amber-400 uppercase tracking-wide mb-1.5">Chọn Truyện Sáng Tác *</label>
+            <select id="select-story" required class="w-full bg-[#13110f] text-white border border-amber-950/60 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-600 text-sm">
+              <!-- Render truyện do chính tài khoản này tạo -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-amber-400 uppercase tracking-wide mb-1.5">Tên Chương Truyện *</label>
+            <input type="text" id="chapter-title" required placeholder="Ví dụ: Hồi 1: Cố nhân tương ngộ" class="w-full bg-[#13110f] text-white border border-amber-950/60 rounded-xl px-4 py-3 focus:outline-none text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-amber-400 uppercase tracking-wide mb-1.5">Bản Thảo Chương *</label>
+            <textarea id="chapter-content" required rows="10" placeholder="Viết văn bản tại đây..." class="w-full bg-[#13110f] text-white border border-amber-950/60 rounded-xl px-4 py-3 focus:outline-none resize-none text-sm"></textarea>
+          </div>
+          <button type="submit" class="w-full bg-amber-700 hover:bg-amber-600 text-white font-bold py-3 rounded-xl transition shadow-lg text-sm">Lưu Bản Thảo & Phát Hành</button>
+        </form>
+      </div>
+    </div>
+
+
+    <!-- ==================== 8. PHÒNG KIỂM DUYỆT ADMIN ==================== -->
+    <div id="view-admin" class="view-section hidden">
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-amber-100 mb-2 flex items-center gap-3">
+          <i class="fa-solid fa-user-shield text-amber-500"></i> Phòng Kiểm Duyệt Admin (Kayden)
+        </h1>
+        <p class="text-amber-200/60">Quản lý duyệt truyện sáng tác và phản hồi góp ý từ độc giả gửi về Everbloom Library.</p>
+      </div>
+
+      <!-- Tab Điều khiển Admin -->
+      <div class="flex border-b border-amber-950/50 mb-6 max-w-md">
+        <button onclick="toggleAdminTab('stories')" id="tab-admin-stories" class="flex-1 py-2 text-center border-b-2 border-amber-500 text-amber-200 font-bold">Kiểm Duyệt Truyện</button>
+        <button onclick="toggleAdminTab('feedbacks')" id="tab-admin-feedbacks" class="flex-1 py-2 text-center border-b-2 border-transparent text-stone-500 hover:text-stone-300 font-semibold">Ý Kiến Góp Ý</button>
+      </div>
+
+      <!-- Phân khu 1: Duyệt truyện -->
+      <div id="admin-stories-section" class="bg-[#1c1816] border border-amber-950/40 rounded-2xl p-6 shadow-xl">
+        <h2 class="text-xl font-bold text-amber-200 mb-6 flex items-center gap-2">
+          <span class="w-1.5 h-5 rounded bg-amber-500"></span> Truyện Chờ Phê Duyệt (<span id="pending-count">0</span>)
+        </h2>
+        <div id="pending-list" class="space-y-6"></div>
+      </div>
+
+      <!-- Phân khu 2: Góp ý từ độc giả -->
+      <div id="admin-feedbacks-section" class="bg-[#1c1816] border border-amber-950/40 rounded-2xl p-6 shadow-xl hidden">
+        <h2 class="text-xl font-bold text-amber-200 mb-6 flex items-center gap-2">
+          <span class="w-1.5 h-5 rounded bg-amber-500"></span> Hòm Thư Đóng Góp (<span id="feedback-count">0</span>)
+        </h2>
+        <div id="admin-feedbacks-list" class="space-y-4"></div>
+      </div>
+    </div>
+
+
+    <!-- ==================== 9. HỒ SƠ CÁ NHÂN (VIEW: PROFILE) ==================== -->
+    <div id="view-profile" class="view-section hidden">
+      <div class="max-w-md mx-auto bg-[#1c1816] p-8 rounded-2xl border border-amber-950/40 shadow-2xl text-center">
+        <h2 class="text-2xl font-bold text-amber-100 mb-6"><i class="fa-solid fa-address-card mr-2 text-amber-600"></i>Hồ Sơ Cá Nhân</h2>
+        
+        <div class="flex flex-col items-center space-y-4 mb-6">
+          <!-- Xem trước Avatar -->
+          <div id="profile-avatar-preview-container">
+            <!-- JS render ảnh đại diện tại đây -->
+          </div>
+          
+          <div class="w-full">
+            <span class="block text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">Tải Lên Ảnh Đại Diện Mới</span>
+            <div class="bg-[#13110f] p-4 rounded-xl border border-amber-950/40">
+              <input type="file" id="profile-avatar-file" accept="image/*" onchange="previewAvatar(event)" class="text-stone-400 text-xs file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-bold file:bg-amber-900 file:text-amber-100 hover:file:bg-amber-800 cursor-pointer">
+              <p class="text-[10px] text-stone-500 mt-2">* Vui lòng chọn ảnh định dạng vuông và dung lượng dưới 1.5MB để hiển thị đẹp nhất.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-[#13110f] p-4 rounded-xl border border-amber-950/45 text-left mb-6 space-y-2">
+          <p class="text-xs text-stone-400">Tên Tài Khoản: <span class="text-amber-200 font-bold ml-1" id="profile-username">...</span></p>
+          <p class="text-xs text-stone-400">Chức Vụ Hệ Thống: <span class="text-amber-200 font-bold ml-1" id="profile-role">...</span></p>
+        </div>
+
+        <div class="flex gap-3">
+          <button onclick="navigateTo('home')" class="flex-1 bg-stone-900 hover:bg-stone-800 text-stone-300 font-bold py-2.5 rounded-xl transition text-sm">Hủy Bỏ</button>
+          <button onclick="handleUpdateProfile(event)" class="flex-1 bg-amber-700 hover:bg-amber-600 text-white font-bold py-2.5 rounded-xl transition shadow-lg text-sm">Cập Nhật</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Chân trang -->
+  <footer class="bg-[#1c1816] border-t border-amber-950/30 py-8 text-center text-xs text-amber-500/60">
+    <div class="container mx-auto px-4">
+      <p>© 2026 Everbloom Library. Tất cả quyền hạn được bảo lưu bảo thủ tri thức.</p>
+    </div>
+  </footer>
+
+  <!-- Script Logic -->
+  <script>
+    const defaultStories = [];
+
+    // Cài đặt tài khoản Kayden làm Admin mặc định
+    const defaultUsers = [
+      { username: "Kayden", password: "Hivong@123", role: "admin", favorites: [], avatar: null }
+    ];
+
+    const defaultFeedbacks = [];
+
+    let stories = [];
+    let users = [];
+    let feedbacks = [];
+    let currentUser = null;
+
+    let currentStoryId = null;
+    let currentChapterIndex = null;
+    let currentReaderFontSize = 18;
+    
+    // Lưu trữ tạm chuỗi Base64 của Avatar khi chuẩn bị cập nhật
+    let tempAvatarBase64 = null;
+
+    // Khởi động
+    function init() {
+      const storedUsers = localStorage.getItem('library_users_db');
+      if (storedUsers) {
+        users = JSON.parse(storedUsers);
+        const hasKayden = users.some(u => u.username.toLowerCase() === 'kayden');
+        if (!hasKayden) {
+          users.push(defaultUsers[0]);
+          localStorage.setItem('library_users_db', JSON.stringify(users));
+        }
+      } else {
+        users = defaultUsers;
+        localStorage.setItem('library_users_db', JSON.stringify(users));
+      }
+
+      const storedStories = localStorage.getItem('library_stories_db');
+      if (storedStories) {
+        stories = JSON.parse(storedStories);
+      } else {
+        stories = defaultStories;
+        localStorage.setItem('library_stories_db', JSON.stringify(stories));
+      }
+
+      const storedFeedbacks = localStorage.getItem('library_feedbacks_db');
+      if (storedFeedbacks) {
+        feedbacks = JSON.parse(storedFeedbacks);
+      } else {
+        feedbacks = defaultFeedbacks;
+        localStorage.setItem('library_feedbacks_db', JSON.stringify(feedbacks));
+      }
+
+      const storedUserSession = sessionStorage.getItem('library_session');
+      if (storedUserSession) {
+        currentUser = JSON.parse(storedUserSession);
+      }
+
+      updateNavbarAuth();
+      updateAdminBtn();
+      renderHome();
+    }
+
+    function saveToLocalStorage() {
+      localStorage.setItem('library_stories_db', JSON.stringify(stories));
+    }
+
+    // Chuyển đổi file ảnh sang mã Base64 bất đồng bộ
+    function fileToBase64(file) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = function() {
+          resolve(reader.result);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Cập nhật thanh tài khoản kèm Avatar
+    function updateNavbarAuth() {
+      const area = document.getElementById('auth-nav-area');
+      if (currentUser) {
+        // Vẽ Avatar ở Navbar
+        let navAvatarHTML = "";
+        if (currentUser.avatar) {
+          navAvatarHTML = `<img src="${currentUser.avatar}" alt="avatar" class="w-8 h-8 rounded-full object-cover border border-amber-800/60 cursor-pointer" onclick="navigateTo('profile')">`;
+        } else {
+          navAvatarHTML = `
+            <div class="w-8 h-8 rounded-full bg-amber-800 text-amber-100 flex items-center justify-center font-bold text-xs border border-amber-800/60 cursor-pointer" onclick="navigateTo('profile')">
+              ${currentUser.username.charAt(0).toUpperCase()}
+            </div>
+          `;
+        }
+
+        area.innerHTML = `
+          <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-2">
+              ${navAvatarHTML}
+              <span class="text-sm font-semibold text-amber-200 cursor-pointer hover:text-amber-400 transition" onclick="navigateTo('profile')">
+                ${currentUser.username}
+              </span>
+            </div>
+            <button onclick="navigateTo('profile')" class="text-xs bg-[#1c1816] hover:bg-stone-900 border border-amber-950/60 px-2.5 py-1.5 rounded-lg text-amber-300 transition" title="Hồ sơ">
+              <i class="fa-solid fa-gear"></i>
+            </button>
+            <button onclick="handleLogout()" class="text-xs bg-[#13110f] hover:bg-stone-900 border border-amber-950/60 px-3 py-1.5 rounded-lg text-amber-500 font-bold transition">
+              Đăng Xuất
+            </button>
+          </div>
+        `;
+      } else {
+        area.innerHTML = `
+          <button onclick="navigateTo('auth')" class="bg-amber-800 hover:bg-amber-700 text-[#f5efe6] text-sm font-bold px-4 py-2 rounded-lg transition shadow">
+            Đăng Nhập / Đăng Ký
+          </button>
+        `;
+      }
+    }
+
+    function updateAdminBtn() {
+      const adminBtn = document.getElementById('nav-admin-btn');
+      if (currentUser && currentUser.role === 'admin') {
+        adminBtn.classList.remove('hidden');
+      } else {
+        adminBtn.classList.add('hidden');
+      }
+    }
+
+    function handleLogout() {
+      currentUser = null;
+      sessionStorage.removeItem('library_session');
+      updateNavbarAuth();
+      updateAdminBtn();
+      alert("Hẹn gặp lại bạn tại Everbloom Library!");
+      navigateTo('home');
+    }
+
+    // Router
+    function navigateTo(viewName, data = {}) {
+      document.querySelectorAll('.view-section').forEach(view => view.classList.add('hidden'));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      if (viewName === 'home') {
+        document.getElementById('view-home').classList.remove('hidden');
+        renderHome();
+      } else if (viewName === 'story-detail') {
+        document.getElementById('view-story-detail').classList.remove('hidden');
+        renderStoryDetail(data.storyId);
+      } else if (viewName === 'reader') {
+        document.getElementById('view-reader').classList.remove('hidden');
+        renderReader(data.storyId, data.chapterIndex);
+      } else if (viewName === 'library') {
+        document.getElementById('view-library').classList.remove('hidden');
+        renderLibrary();
+      } else if (viewName === 'rules') {
+        document.getElementById('view-rules').classList.remove('hidden');
+      } else if (viewName === 'auth') {
+        document.getElementById('view-auth').classList.remove('hidden');
+      } else if (viewName === 'creator') {
+        document.getElementById('view-creator').classList.remove('hidden');
+        renderCreatorPanel();
+      } else if (viewName === 'admin') {
+        if (!currentUser || currentUser.role !== 'admin') {
+          alert("Chỉ Admin Kayden mới được quyền truy cập!");
+          navigateTo('home');
+          return;
+        }
+        document.getElementById('view-admin').classList.remove('hidden');
+        renderAdminDashboard();
+      } else if (viewName === 'profile') {
+        if (!currentUser) {
+          navigateTo('auth');
+          return;
+        }
+        document.getElementById('view-profile').classList.remove('hidden');
+        tempAvatarBase64 = null;
+        renderAvatarPreview();
+        document.getElementById('profile-username').innerText = currentUser.username;
+        document.getElementById('profile-role').innerText = currentUser.role === 'admin' ? "Quản trị viên (Admin)" : "Thành viên (Độc giả/Tác giả)";
+      }
+    }
+
+    // Render Kệ sách Trang Chủ
+    function renderHome() {
+      const grid = document.getElementById('stories-grid');
+      grid.innerHTML = '';
+
+      const approvedStories = stories.filter(s => s.approved === true);
+
+      if (approvedStories.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full text-center text-amber-500/50 py-12">
+            <p>Everbloom Library chưa bày biện đầu sách nào.</p>
+          </div>
+        `;
+        return;
+      }
+
+      approvedStories.forEach(story => {
+        const coverImg = story.cover || `https://picsum.photos/seed/${story.id}/300/400`;
+        const likesCount = story.likes ? story.likes.length : 0;
+        
+        const card = document.createElement('div');
+        card.className = "group bg-[#13110f] rounded-xl overflow-hidden border border-amber-950/60 hover:border-amber-700/60 transition-all duration-300 hover:-translate-y-1.5 cursor-pointer flex flex-col shadow-md";
+        card.onclick = () => navigateTo('story-detail', { storyId: story.id });
+        
+        card.innerHTML = `
+          <div class="relative h-60 w-full bg-stone-900 overflow-hidden border-b border-amber-950/30">
+            <img src="${coverImg}" alt="${story.title}" class="w-full h-full object-cover transition duration-500 group-hover:scale-105">
+            <span class="absolute top-3 left-3 bg-amber-900/95 border border-amber-800 text-amber-100 text-[10px] uppercase tracking-wider px-2.5 py-1 rounded shadow-md">${story.genre}</span>
+          </div>
+          <div class="p-4 flex-grow flex flex-col justify-between">
+            <div>
+              <h3 class="font-bold text-amber-100 text-base group-hover:text-amber-400 transition line-clamp-1 mb-1" title="${story.title}">${story.title}</h3>
+              <p class="text-[11px] text-amber-400/50 mb-2">Tác giả: <span class="text-amber-200">${story.author}</span></p>
+              <p class="text-xs text-[#E2D6C5]/70 line-clamp-3 leading-relaxed mb-4">${story.description}</p>
+            </div>
+            <div class="text-[11px] text-amber-600/70 border-t border-amber-950/30 pt-3 flex justify-between items-center">
+              <span><i class="fa-solid fa-list-ul mr-1 text-amber-700"></i> ${story.chapters.length} Chương</span>
+              <span class="flex items-center gap-1"><i class="fa-solid fa-heart text-red-800"></i> ${likesCount} Thích</span>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // Tìm kiếm sách
+    function searchStories() {
+      const keyword = document.getElementById('search-input').value.toLowerCase();
+      const approvedStories = stories.filter(s => s.approved === true);
+      const cards = document.querySelectorAll('#stories-grid > div');
+      
+      approvedStories.forEach((story, index) => {
+        const matches = story.title.toLowerCase().includes(keyword) || story.author.toLowerCase().includes(keyword);
+        if (cards[index]) {
+          if (matches) cards[index].classList.remove('hidden');
+          else cards[index].classList.add('hidden');
+        }
+      });
+    }
+
+    // Chi tiết sách
+    function renderStoryDetail(storyId) {
+      const story = stories.find(s => s.id === storyId);
+      if (!story) return;
+
+      currentStoryId = storyId;
+      const container = document.getElementById('story-info-container');
+      const coverImg = story.cover || `https://picsum.photos/seed/${story.id}/300/400`;
+
+      const isLiked = currentUser && story.likes && story.likes.includes(currentUser.username);
+      
+      let inLibrary = false;
+      if (currentUser) {
+        const fullUser = users.find(u => u.username === currentUser.username);
+        if (fullUser && fullUser.favorites && fullUser.favorites.includes(storyId)) {
+          inLibrary = true;
+        }
+      }
+
+      const canDelete = currentUser && (currentUser.role === 'admin' || currentUser.username === story.owner);
+
+      let chaptersHTML = '';
+      if (story.chapters.length === 0) {
+        chaptersHTML = `<p class="text-amber-500/50 italic text-sm">Cuốn sách này chưa chắp bút thêm chương.</p>`;
+      } else {
+        story.chapters.forEach((chap, idx) => {
+          chaptersHTML += `
+            <div onclick="navigateTo('reader', { storyId: '${story.id}', chapterIndex: ${idx} })" class="bg-[#13110f] hover:bg-[#211a15] p-4 rounded-lg border border-amber-950/60 hover:border-amber-700/40 cursor-pointer flex justify-between items-center transition">
+              <span class="font-medium text-amber-200">${chap.title}</span>
+              <i class="fa-solid fa-chevron-right text-amber-800 text-xs"></i>
+            </div>
+          `;
+        });
+      }
+
+      container.innerHTML = `
+        <div class="flex flex-col md:flex-row gap-8 mb-8">
+          <div class="w-full md:w-56 flex-shrink-0">
+            <img src="${coverImg}" alt="${story.title}" class="w-full h-auto max-h-76 rounded-xl shadow-2xl border border-amber-900/30 object-cover">
+          </div>
+          <div class="flex-grow flex flex-col justify-between">
+            <div>
+              <h1 class="text-3xl font-black text-amber-100 mb-3">${story.title}</h1>
+              <div class="flex flex-wrap gap-2.5 mb-5">
+                <span class="bg-amber-950/30 border border-amber-900/20 text-amber-300 text-xs px-3.5 py-1.5 rounded-full"><i class="fa-solid fa-feather mr-1.5"></i>Tác giả: ${story.author}</span>
+                <span class="bg-amber-950/30 border border-amber-900/20 text-amber-300 text-xs px-3.5 py-1.5 rounded-full"><i class="fa-solid fa-tags mr-1.5"></i>${story.genre}</span>
+                <span class="bg-amber-950/30 border border-amber-900/20 text-amber-300 text-xs px-3.5 py-1.5 rounded-full"><i class="fa-solid fa-heart mr-1.5 text-red-800"></i>${story.likes ? story.likes.length : 0} Thích</span>
+              </div>
+              <div class="bg-[#1c1816]/60 p-5 rounded-xl border border-amber-950/40 mb-6">
+                <h3 class="text-xs font-bold text-amber-400 mb-2 uppercase tracking-wider">Tóm tắt</h3>
+                <p class="text-[#E2D6C5]/90 text-sm leading-relaxed whitespace-pre-line">${story.description}</p>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+              ${story.chapters.length > 0 ? 
+                `<button onclick="navigateTo('reader', { storyId: '${story.id}', chapterIndex: 0 })" class="bg-amber-700 hover:bg-amber-600 text-white font-bold px-6 py-3 rounded-lg transition shadow-md">Đọc Sách</button>` : 
+                `<button class="bg-[#1c1816] text-amber-600/40 border border-amber-950/60 px-6 py-3 rounded-lg cursor-not-allowed" disabled>Chưa có chương</button>`
+              }
+              
+              <button onclick="toggleLike('${story.id}')" class="px-5 py-3 rounded-lg border border-amber-950/60 hover:bg-stone-900 transition flex items-center space-x-2 text-sm ${isLiked ? 'bg-red-950/30 text-red-400 border-red-900/40' : 'text-amber-200'}">
+                <i class="fa-${isLiked ? 'solid' : 'regular'} fa-heart"></i>
+                <span>${isLiked ? 'Đã Thích' : 'Yêu Thích'}</span>
+              </button>
+
+              <button onclick="toggleFavorite('${story.id}')" class="px-5 py-3 rounded-lg border border-amber-950/60 hover:bg-stone-900 transition flex items-center space-x-2 text-sm ${inLibrary ? 'bg-amber-950/50 text-amber-300 border-amber-800/60' : 'text-amber-200'}">
+                <i class="fa-${inLibrary ? 'solid' : 'regular'} fa-bookmark"></i>
+                <span>${inLibrary ? 'Trong Tủ Sách' : 'Lưu Vào Tủ Sách'}</span>
+              </button>
+
+              ${canDelete ? `
+                <button onclick="handleDeleteStory('${story.id}')" class="px-5 py-3 rounded-lg border border-red-900/40 bg-red-950/30 text-red-300 hover:bg-red-900/60 transition flex items-center space-x-2 text-sm">
+                  <i class="fa-solid fa-trash-can"></i>
+                  <span>Xóa Truyện</span>
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8 border-t border-amber-950/30 pt-8">
+          <h2 class="text-lg font-bold text-amber-100 mb-4 flex items-center gap-2">
+            <span class="w-1 h-5 bg-amber-600"></span> Chương Truyện
+          </h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            ${chaptersHTML}
+          </div>
+        </div>
+      `;
+
+      renderCommentsSection(story);
+    }
+
+    // Xóa truyện
+    function handleDeleteStory(storyId) {
+      const story = stories.find(s => s.id === storyId);
+      if (!story) return;
+
+      const confirmDelete = confirm(`CẢNH BÁO: Bạn có chắc chắn muốn xóa vĩnh viễn cuốn sách "${story.title}" cùng toàn bộ chương và bình luận đi kèm không? Hành động gỡ bỏ này không thể hoàn tác!`);
+      if (confirmDelete) {
+        stories = stories.filter(s => s.id !== storyId);
+        saveToLocalStorage();
+        alert("Đã gỡ tác phẩm thành công!");
+        navigateTo('home');
+      }
+    }
+
+    // Like sách
+    function toggleLike(storyId) {
+      if (!currentUser) {
+        alert("Bạn cần đăng nhập tài khoản để gửi thả thích!");
+        navigateTo('auth');
+        return;
+      }
+
+      const story = stories.find(s => s.id === storyId);
+      if (!story) return;
+
+      if (!story.likes) story.likes = [];
+
+      const userIndex = story.likes.indexOf(currentUser.username);
+      if (userIndex === -1) {
+        story.likes.push(currentUser.username);
+      } else {
+        story.likes.splice(userIndex, 1);
+      }
+
+      saveToLocalStorage();
+      renderStoryDetail(storyId);
+    }
+
+    // Lưu tủ sách
+    function toggleFavorite(storyId) {
+      if (!currentUser) {
+        alert("Bạn cần đăng nhập tài khoản để lưu truyện!");
+        navigateTo('auth');
+        return;
+      }
+
+      const fullUser = users.find(u => u.username === currentUser.username);
+      if (!fullUser) return;
+
+      if (!fullUser.favorites) fullUser.favorites = [];
+
+      const index = fullUser.favorites.indexOf(storyId);
+      if (index === -1) {
+        fullUser.favorites.push(storyId);
+        alert("Đã thêm sách vào Tủ cá nhân của bạn!");
+      } else {
+        fullUser.favorites.splice(index, 1);
+        alert("Đã gỡ bỏ tác phẩm khỏi Tủ sách.");
+      }
+
+      localStorage.setItem('library_users_db', JSON.stringify(users));
+      currentUser = fullUser;
+      sessionStorage.setItem('library_session', JSON.stringify(currentUser));
+
+      renderStoryDetail(storyId);
+    }
+
+    // Bình luận truyện kèm Avatar đồng bộ
+    function renderCommentsSection(story) {
+      const formContainer = document.getElementById('comment-form-container');
+      const commentsList = document.getElementById('comments-list');
+
+      if (currentUser) {
+        formContainer.innerHTML = `
+          <form onsubmit="handlePostComment(event, '${story.id}')" class="flex flex-col gap-3">
+            <textarea id="comment-text" required placeholder="Ghi bình luận của bạn tại đây..." class="w-full bg-[#13110f] text-white border border-amber-950/60 rounded-xl px-4 py-3 focus:outline-none focus:border-amber-600 text-sm resize-none" rows="3"></textarea>
+            <button type="submit" class="self-end bg-amber-700 hover:bg-amber-600 text-white font-bold text-xs px-5 py-2.5 rounded-lg transition">Gửi Bình Luận</button>
+          </form>
+        `;
+      } else {
+        formContainer.innerHTML = `
+          <div class="bg-[#13110f] p-4 rounded-xl border border-amber-950/60 text-center">
+            <span class="text-sm text-amber-200/50 mr-2">Cần đăng nhập tài khoản để đăng ý kiến bình luận.</span>
+            <button onclick="navigateTo('auth')" class="text-xs bg-amber-800 hover:bg-amber-700 text-white px-3 py-1.5 rounded">Đăng Nhập Ngay</button>
+          </div>
+        `;
+      }
+
+      commentsList.innerHTML = '';
+      if (!story.comments || story.comments.length === 0) {
+        commentsList.innerHTML = `<p class="text-stone-500 text-xs italic font-serif">Chưa nhận được đánh giá nào. Hãy để lại bình luận khai bút!</p>`;
+        return;
+      }
+
+      story.comments.forEach(c => {
+        // Tìm thông tin avatar người bình luận
+        const commenter = users.find(u => u.username === c.username);
+        let avatarHTML = "";
+        if (commenter && commenter.avatar) {
+          avatarHTML = `<img src="${commenter.avatar}" alt="avatar" class="w-10 h-10 rounded-full object-cover border border-amber-950/50 flex-shrink-0">`;
+        } else {
+          avatarHTML = `
+            <div class="w-10 h-10 rounded-full bg-amber-800/80 text-amber-100 flex items-center justify-center font-bold text-sm border border-amber-950/50 flex-shrink-0 select-none">
+              ${c.username.charAt(0).toUpperCase()}
+            </div>
+          `;
+        }
+
+        const div = document.createElement('div');
+        div.className = "bg-[#1c1816]/60 p-4 rounded-xl border border-amber-950/40 text-sm flex gap-3.5 items-start shadow";
+        div.innerHTML = `
+          ${avatarHTML}
+          <div class="flex-grow">
+            <div class="flex justify-between items-center mb-1">
+              <span class="font-bold text-amber-200">${c.username}</span>
+              <span class="text-[10px] text-stone-500 font-mono">${c.date}</span>
+            </div>
+            <p class="text-stone-300 leading-relaxed">${c.text}</p>
+          </div>
+        `;
+        commentsList.appendChild(div);
+      });
+    }
+
+    function handlePostComment(event, storyId) {
+      event.preventDefault();
+      const txtInput = document.getElementById('comment-text');
+      const text = txtInput.value.trim();
+      if (!text) return;
+
+      const story = stories.find(s => s.id === storyId);
+      if (!story) return;
+
+      if (!story.comments) story.comments = [];
+
+      const today = new Date();
+      const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+
+      story.comments.unshift({
+        username: currentUser.username,
+        text,
+        date: dateStr
+      });
+
+      saveToLocalStorage();
+      txtInput.value = '';
+      renderStoryDetail(storyId);
+    }
+
+
+    // ==================== TỦ SÁCH CÁ NHÂN ====================
+    function renderLibrary() {
+      const shelf = document.getElementById('favorite-shelf');
+      shelf.innerHTML = '';
+
+      if (!currentUser) {
+        shelf.innerHTML = `
+          <div class="col-span-full text-center py-10">
+            <i class="fa-solid fa-lock text-3xl text-amber-700 mb-3 block"></i>
+            <p class="text-sm text-amber-200/60 mb-4">Mời đăng nhập tài khoản để mở tủ sách cá nhân.</p>
+            <button onclick="navigateTo('auth')" class="bg-amber-800 hover:bg-amber-700 text-white font-bold px-4 py-2 rounded text-xs">Đăng Nhập</button>
+          </div>
+        `;
+        return;
+      }
+
+      const fullUser = users.find(u => u.username === currentUser.username);
+      if (!fullUser || !fullUser.favorites || fullUser.favorites.length === 0) {
+        shelf.innerHTML = `
+          <div class="col-span-full text-center py-12 text-amber-200/50">
+            <p class="text-sm">Kệ sách cá nhân của bạn hiện chưa có sách.</p>
+            <p class="text-xs italic mt-1">Lưu trữ các đầu sách bên ngoài kệ công cộng để đặt lên kệ gỗ này nhé!</p>
+          </div>
+        `;
+        return;
+      }
+
+      fullUser.favorites.forEach(storyId => {
+        const story = stories.find(s => s.id === storyId);
+        if (!story) return;
+
+        const coverImg = story.cover || `https://picsum.photos/seed/${story.id}/300/400`;
+
+        const book = document.createElement('div');
+        book.className = "group cursor-pointer text-center relative hover:-translate-y-2 transition duration-300";
+        book.onclick = () => navigateTo('story-detail', { storyId: story.id });
+        
+        book.innerHTML = `
+          <div class="bg-stone-900 aspect-[3/4] rounded shadow-lg overflow-hidden border border-amber-950/60 relative">
+            <img src="${coverImg}" alt="${story.title}" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-stone-950/80 to-transparent flex items-end p-2 opacity-0 group-hover:opacity-100 transition duration-300">
+              <span class="text-[10px] text-amber-200 font-bold uppercase truncate w-full">${story.title}</span>
+            </div>
+          </div>
+          <div class="h-2 bg-amber-950 border-t border-amber-900 rounded-b mt-1.5 shadow"></div>
+          <p class="text-xs font-bold text-amber-200/80 mt-2 truncate group-hover:text-amber-400 transition" title="${story.title}">${story.title}</p>
+        `;
+        shelf.appendChild(book);
+      });
+    }
+
+
+    // ==================== ĐỌC CHƯƠNG ====================
+    function renderReader(storyId, chapterIndex) {
+      const story = stories.find(s => s.id === storyId);
+      if (!story || !story.chapters[chapterIndex]) return;
+
+      currentStoryId = storyId;
+      currentChapterIndex = chapterIndex;
+      const chapter = story.chapters[chapterIndex];
+
+      document.getElementById('reader-story-title').innerText = story.title;
+      document.getElementById('reader-chapter-title').innerText = chapter.title;
+      
+      const paragraphs = chapter.content.split('\n').map(p => p.trim()).filter(p => p.length > 0);
+      const contentDiv = document.getElementById('reader-content');
+      contentDiv.innerHTML = paragraphs.map(p => `<p class="mb-5 leading-relaxed text-justify">${p}</p>`).join('');
+      contentDiv.style.fontSize = `${currentReaderFontSize}px`;
+
+      const btnBack = document.getElementById('btn-back-to-story');
+      btnBack.onclick = () => navigateTo('story-detail', { storyId });
+
+      const btnPrev = document.getElementById('btn-prev-chapter');
+      const btnNext = document.getElementById('btn-next-chapter');
+
+      if (chapterIndex > 0) {
+        btnPrev.disabled = false;
+        btnPrev.onclick = () => renderReader(storyId, chapterIndex - 1);
+      } else {
+        btnPrev.disabled = true;
+      }
+
+      if (chapterIndex < story.chapters.length - 1) {
+        btnNext.disabled = false;
+        btnNext.onclick = () => renderReader(storyId, chapterIndex + 1);
+      } else {
+        btnNext.disabled = true;
+      }
+    }
+
+
+    // ==================== GÓP Ý & PHẢN HỒI ====================
+    function handleSendFeedback(event) {
+      event.preventDefault();
+      const txtVal = document.getElementById('feedback-text').value.trim();
+      if (!txtVal) return;
+
+      const sender = currentUser ? currentUser.username : "Khách ẩn danh";
+      const today = new Date();
+      const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+
+      const newFb = {
+        id: 'fb-' + Date.now(),
+        username: sender,
+        content: txtVal,
+        date: dateStr
+      };
+
+      feedbacks.push(newFb);
+      localStorage.setItem('library_feedbacks_db', JSON.stringify(feedbacks));
+
+      document.getElementById('feedback-text').value = '';
+      alert("Cảm ơn bạn! Ý kiến góp ý đã được chuyển trực tiếp tới Admin Kayden kiểm tra.");
+      navigateTo('home');
+    }
+
+
+    // ==================== ĐĂNG KÝ / ĐĂNG NHẬP (AUTH) ====================
+    function toggleAuthTab(tab) {
+      const tabLogin = document.getElementById('tab-login');
+      const tabRegister = document.getElementById('tab-register');
+      const formLogin = document.getElementById('form-login');
+      const formRegister = document.getElementById('form-register');
+
+      if (tab === 'login') {
+        tabLogin.className = "flex-1 py-2 text-center border-b-2 border-amber-500 text-amber-200 font-bold";
+        tabRegister.className = "flex-1 py-2 text-center border-b-2 border-transparent text-stone-500 hover:text-stone-300 font-semibold";
+        formLogin.classList.remove('hidden');
+        formRegister.classList.add('hidden');
+      } else {
+        tabLogin.className = "flex-1 py-2 text-center border-b-2 border-transparent text-stone-500 hover:text-stone-300 font-semibold";
+        tabRegister.className = "flex-1 py-2 text-center border-b-2 border-amber-500 text-amber-200 font-bold";
+        formLogin.classList.add('hidden');
+        formRegister.classList.remove('hidden');
+      }
+    }
+
+    // Đăng ký
+    function handleRegister(event) {
+      event.preventDefault();
+      const usernameInput = document.getElementById('register-username').value.trim();
+      const passwordInput = document.getElementById('register-password').value.trim();
+
+      if (!usernameInput || !passwordInput) {
+        alert("Vui lòng điền đủ thông tin!");
+        return;
+      }
+
+      const isExists = users.some(u => u.username.toLowerCase() === usernameInput.toLowerCase());
+      if (isExists) {
+        alert("Tên tài khoản này đã được sử dụng!");
+        return;
+      }
+
+      const newUser = {
+        username: usernameInput,
+        password: passwordInput,
+        role: "user",
+        favorites: [],
+        avatar: null
+      };
+
+      users.push(newUser);
+      localStorage.setItem('library_users_db', JSON.stringify(users));
+      
+      alert("Đăng ký thành công! Mời bạn đăng nhập.");
+      toggleAuthTab('login');
+      document.getElementById('form-register').reset();
+    }
+
+    // Đăng nhập
+    function handleLogin(event) {
+      event.preventDefault();
+      const userVal = document.getElementById('login-username').value.trim();
+      const passVal = document.getElementById('login-password').value.trim();
+
+      const user = users.find(u => u.username.toLowerCase() === userVal.toLowerCase());
+      if (!user || user.password !== passVal) {
+        alert("Tên đăng nhập hoặc mật khẩu không chính xác!");
+        return;
+      }
+
+      currentUser = user;
+      sessionStorage.setItem('library_session', JSON.stringify(currentUser));
+      
+      updateNavbarAuth();
+      updateAdminBtn();
+      
+      showWelcomeModal(user.username);
+      
+      document.getElementById('form-login').reset();
+    }
+
+    function showWelcomeModal(username) {
+      const modal = document.getElementById('welcome-modal');
+      const text = document.getElementById('welcome-message-text');
+      
+      text.innerHTML = `Chào mừng <strong class="text-amber-400">${username}</strong> đến với <strong class="text-amber-200">Everbloom Library</strong>, hãy viết nên câu chuyện của bản thân hoặc trải nghiệm cùng câu chuyện của người khác nhé (nhớ lưu ý luật nhá xD)`;
+      
+      modal.classList.remove('hidden');
+    }
+
+    function closeWelcomeModal() {
+      const modal = document.getElementById('welcome-modal');
+      modal.classList.add('hidden');
+      
+      if (currentUser && currentUser.role === 'admin') {
+        navigateTo('admin');
+      } else {
+        navigateTo('home');
+      }
+    }
+
+
+    // ==================== STUDIO SÁNG TÁC ====================
+    function renderCreatorPanel() {
+      const warning = document.getElementById('creator-auth-warning');
+      const panel = document.getElementById('creator-panel');
+
+      if (!currentUser) {
+        warning.classList.remove('hidden');
+        panel.classList.add('hidden');
+      } else {
+        warning.classList.add('hidden');
+        panel.classList.remove('hidden');
+        document.getElementById('story-author').value = currentUser.username;
+        updateCreatorStorySelect();
+      }
+    }
+
+    function toggleCreatorTab(tab) {
+      const tabNewStory = document.getElementById('tab-new-story');
+      const tabNewChapter = document.getElementById('tab-new-chapter');
+      const formNewStory = document.getElementById('form-create-story');
+      const formNewChapter = document.getElementById('form-create-chapter');
+
+      if (tab === 'new-story') {
+        tabNewStory.className = "flex-1 py-2 text-center border-b-2 border-amber-500 text-amber-200 font-bold";
+        tabNewChapter.className = "flex-1 py-2 text-center border-b-2 border-transparent text-stone-500 hover:text-stone-300 font-semibold";
+        formNewStory.classList.remove('hidden');
+        formNewChapter.classList.add('hidden');
+      } else {
+        tabNewStory.className = "flex-1 py-2 text-center border-b-2 border-transparent text-stone-500 hover:text-stone-300 font-semibold";
+        tabNewChapter.className = "flex-1 py-2 text-center border-b-2 border-amber-500 text-amber-200 font-bold";
+        formNewStory.classList.add('hidden');
+        formNewChapter.classList.remove('hidden');
+      }
+    }
+
+    function updateCreatorStorySelect() {
+      const select = document.getElementById('select-story');
+      select.innerHTML = '';
+      
+      const myStories = stories.filter(s => s.owner === currentUser.username);
+
+      if (myStories.length === 0) {
+        select.innerHTML = `<option value="">-- Bạn phải tạo sách truyện mới trước --</option>`;
+        return;
+      }
+      myStories.forEach(s => {
+        const option = document.createElement('option');
+        option.value = s.id;
+        option.innerText = `${s.title} ${s.approved ? '' : '(Chờ duyệt)'}`;
+        option.className = "bg-slate-900";
+        select.appendChild(option);
+      });
+    }
+
+    // Gửi sách mới (Xử lý upload ảnh Base64 của ảnh bìa)
+    async function handleCreateStory(event) {
+      event.preventDefault();
+      
+      const title = document.getElementById('story-title').value.trim();
+      const genre = document.getElementById('story-genre').value.trim();
+      const description = document.getElementById('story-desc').value.trim();
+
+      let coverSrc = "https://picsum.photos/seed/" + Date.now() + "/300/400"; // Ảnh mặc định ngẫu nhiên
+      const urlInput = document.getElementById('story-cover').value.trim();
+      const fileInput = document.getElementById('story-cover-file');
+
+      // Ưu tiên tệp ảnh tải lên từ thiết bị trước
+      if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        if (file.size > 1.5 * 1024 * 1024) {
+          alert("Ảnh bìa sách quá lớn! Mời bạn chọn ảnh nhẹ hơn 1.5MB.");
+          return;
+        }
+        coverSrc = await fileToBase64(file);
+      } else if (urlInput) {
+        coverSrc = urlInput;
+      }
+
+      const newStory = {
+        id: 'story-' + Date.now(),
+        title,
+        author: currentUser.username, 
+        owner: currentUser.username,
+        genre,
+        cover: coverSrc,
+        description,
+        approved: false,
+        likes: [],
+        comments: [],
+        chapters: []
+      };
+
+      stories.push(newStory);
+      saveToLocalStorage();
+      
+      document.getElementById('form-create-story').reset();
+      alert(`Gửi yêu cầu đăng sách "${title}" thành công! Sách đang trong hàng đợi Admin kiểm duyệt.`);
+      navigateTo('home');
+    }
+
+    function handleCreateChapter(event) {
+      event.preventDefault();
+
+      const storyId = document.getElementById('select-story').value;
+      const title = document.getElementById('chapter-title').value.trim();
+      const content = document.getElementById('chapter-content').value.trim();
+
+      if (!storyId) {
+        alert("Lỗi: Hãy lựa chọn sách!");
+        return;
+      }
+
+      const storyIndex = stories.findIndex(s => s.id === storyId);
+      if (storyIndex !== -1) {
+        stories[storyIndex].chapters.push({ title, content });
+        saveToLocalStorage();
+        
+        document.getElementById('form-create-chapter').reset();
+        alert(`Đã hoàn tất đăng tải chương "${title}"!`);
+        
+        if (stories[storyIndex].approved) {
+          navigateTo('story-detail', { storyId });
+        } else {
+          navigateTo('home');
+        }
+      }
+    }
+
+
+    // ==================== TRANG KIỂM DUYỆT ADMIN ====================
+    function toggleAdminTab(tab) {
+      const tabStories = document.getElementById('tab-admin-stories');
+      const tabFeedbacks = document.getElementById('tab-admin-feedbacks');
+      const storiesSection = document.getElementById('admin-stories-section');
+      const feedbacksSection = document.getElementById('admin-feedbacks-section');
+
+      if (tab === 'stories') {
+        tabStories.className = "flex-1 py-2 text-center border-b-2 border-amber-500 text-amber-200 font-bold";
+        tabFeedbacks.className = "flex-1 py-2 text-center border-b-2 border-transparent text-stone-500 hover:text-stone-300 font-semibold";
+        storiesSection.classList.remove('hidden');
+        feedbacksSection.classList.add('hidden');
+        renderAdminDashboard();
+      } else {
+        tabStories.className = "flex-1 py-2 text-center border-b-2 border-transparent text-stone-500 hover:text-stone-300 font-semibold";
+        tabFeedbacks.className = "flex-1 py-2 text-center border-b-2 border-amber-500 text-amber-200 font-bold";
+        storiesSection.classList.add('hidden');
+        feedbacksSection.classList.remove('hidden');
+        renderAdminFeedbacks();
+      }
+    }
+
+    function renderAdminDashboard() {
+      const pendingList = document.getElementById('pending-list');
+      const pendingCountText = document.getElementById('pending-count');
+      
+      const pendingStories = stories.filter(s => s.approved === false);
+      pendingCountText.innerText = pendingStories.length;
+      pendingList.innerHTML = '';
+
+      if (pendingStories.length === 0) {
+        pendingList.innerHTML = `
+          <div class="text-center py-12 text-amber-500/50">
+            <i class="fa-solid fa-square-check text-amber-800 text-3xl mb-3 block"></i>
+            <p class="text-sm">Hiện không có tác phẩm nào đang đợi phê duyệt.</p>
+          </div>
+        `;
+        return;
+      }
+
+      pendingStories.forEach(story => {
+        const item = document.createElement('div');
+        item.className = "bg-[#13110f] p-5 rounded-xl border border-amber-950/60 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition";
+        item.innerHTML = `
+          <div class="flex gap-4 w-full">
+            <img src="${story.cover}" alt="cover" class="w-16 h-20 rounded-lg object-cover flex-shrink-0 border border-amber-950/40 shadow">
+            <div class="flex-grow">
+              <h3 class="font-bold text-amber-200 text-base">${story.title}</h3>
+              <p class="text-xs text-amber-500/70 mb-1">Tác giả gửi: <span class="text-amber-100 font-medium">${story.author}</span> | Thể loại: <span class="text-amber-400 font-medium">${story.genre}</span></p>
+              <p class="text-xs text-stone-400 line-clamp-2 max-w-xl">${story.description}</p>
+            </div>
+          </div>
+          <div class="flex gap-2 self-end md:self-auto flex-shrink-0">
+            <button onclick="approveStory('${story.id}')" class="bg-emerald-800 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-lg text-xs transition flex items-center gap-1">
+              <i class="fa-solid fa-check"></i> Phê Duyệt
+            </button>
+            <button onclick="rejectStory('${story.id}')" class="bg-red-950/30 hover:bg-red-950/80 text-red-300 border border-red-900/40 font-bold px-4 py-2 rounded-lg text-xs transition flex items-center gap-1">
+              <i class="fa-solid fa-ban"></i> Từ Chối
+            </button>
+          </div>
+        `;
+        pendingList.appendChild(item);
+      });
+    }
+
+    function approveStory(storyId) {
+      const story = stories.find(s => s.id === storyId);
+      if (story) {
+        story.approved = true;
+        saveToLocalStorage();
+        renderAdminDashboard();
+        alert(`Tác phẩm "${story.title}" đã chính thức được xuất bản rộng rãi tại Everbloom Library.`);
+      }
+    }
+
+    function rejectStory(storyId) {
+      const story = stories.find(s => s.id === storyId);
+      if (story) {
+        const confirmReject = confirm(`Bạn có đồng ý xóa bỏ vĩnh viễn đề xuất tác phẩm "${story.title}" này không?`);
+        if (confirmReject) {
+          stories = stories.filter(s => s.id !== storyId);
+          saveToLocalStorage();
+          renderAdminDashboard();
+        }
+      }
+    }
+
+    function renderAdminFeedbacks() {
+      const fbList = document.getElementById('admin-feedbacks-list');
+      const countText = document.getElementById('feedback-count');
+
+      countText.innerText = feedbacks.length;
+      fbList.innerHTML = '';
+
+      if (feedbacks.length === 0) {
+        fbList.innerHTML = `
+          <div class="text-center py-10 text-amber-500/50">
+            <i class="fa-solid fa-envelope-open text-3xl text-amber-800 mb-3 block"></i>
+            <p class="text-sm">Hòm thư đóng góp đang trống rỗng.</p>
+          </div>
+        `;
+        return;
+      }
+
+      feedbacks.forEach((fb, idx) => {
+        const card = document.createElement('div');
+        card.className = "bg-[#13110f] p-4 rounded-xl border border-amber-950/60 flex justify-between items-start gap-4";
+        card.innerHTML = `
+          <div class="flex-grow">
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="text-sm font-bold text-amber-300"><i class="fa-solid fa-user-pen text-amber-600 mr-1.5"></i>${fb.username}</span>
+              <span class="text-[10px] text-stone-500 font-mono">${fb.date}</span>
+            </div>
+            <p class="text-stone-300 text-sm leading-relaxed">${fb.content}</p>
+          </div>
+          <button onclick="deleteFeedback('${fb.id}')" class="text-red-400 hover:text-red-300 p-1 rounded hover:bg-red-950/20 transition text-xs flex items-center gap-1 flex-shrink-0 self-center">
+            <i class="fa-solid fa-trash-can"></i> Xóa
+          </button>
+        `;
+        fbList.appendChild(card);
+      });
+    }
+
+    function deleteFeedback(fbId) {
+      const confirmDel = confirm("Bạn có chắc chắn muốn xóa thư đóng góp này không?");
+      if (confirmDel) {
+        feedbacks = feedbacks.filter(f => f.id !== fbId);
+        localStorage.setItem('library_feedbacks_db', JSON.stringify(feedbacks));
+        renderAdminFeedbacks();
+      }
+    }
+
+
+    // ==================== QUẢN LÝ AVATAR HỒ SƠ ====================
+    async function previewAvatar(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (file.size > 1.5 * 1024 * 1024) {
+        alert("Kích thước ảnh đại diện quá lớn! Vui lòng chọn ảnh nhẹ hơn 1.5MB.");
+        event.target.value = "";
+        return;
+      }
+
+      tempAvatarBase64 = await fileToBase64(file);
+      renderAvatarPreview();
+    }
+
+    function renderAvatarPreview() {
+      const container = document.getElementById('profile-avatar-preview-container');
+      if (tempAvatarBase64) {
+        container.innerHTML = `<img src="${tempAvatarBase64}" alt="preview" class="w-24 h-24 rounded-full object-cover border-2 border-amber-700 shadow-xl">`;
+      } else if (currentUser && currentUser.avatar) {
+        container.innerHTML = `<img src="${currentUser.avatar}" alt="avatar" class="w-24 h-24 rounded-full object-cover border-2 border-amber-700 shadow-xl">`;
+      } else {
+        container.innerHTML = `
+          <div class="w-24 h-24 rounded-full bg-amber-800 text-amber-100 flex items-center justify-center font-bold text-3xl border-2 border-amber-700 shadow-xl select-none">
+            ${currentUser.username.charAt(0).toUpperCase()}
+          </div>
+        `;
+      }
+    }
+
+    function handleUpdateProfile(event) {
+      event.preventDefault();
+      if (!currentUser) return;
+
+      const fullUser = users.find(u => u.username === currentUser.username);
+      if (fullUser) {
+        // Cập nhật Base64 của ảnh mới nếu có
+        if (tempAvatarBase64) {
+          fullUser.avatar = tempAvatarBase64;
+        }
+
+        // Lưu dữ liệu vào CSDL người dùng
+        localStorage.setItem('library_users_db', JSON.stringify(users));
+
+        // Đồng bộ dữ liệu đăng nhập hiện tại
+        currentUser = fullUser;
+        sessionStorage.setItem('library_session', JSON.stringify(currentUser));
+
+        alert("Ảnh đại diện đã được cập nhật thành công!");
+        updateNavbarAuth();
+        navigateTo('home');
+      }
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
